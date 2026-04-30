@@ -1,0 +1,139 @@
+import React, { useState } from "react";
+
+function App() {
+  const [candidates, setCandidates] = useState([
+    { name: "", email: "", file: null }
+  ]);
+  const [jobDesc, setJobDesc] = useState("");
+  const [results, setResults] = useState([]);
+
+  // handle input change
+  const handleChange = (index, field, value) => {
+    const updated = [...candidates];
+    updated[index][field] = value;
+    setCandidates(updated);
+  };
+
+  // add new candidate
+  const addCandidate = () => {
+    setCandidates([...candidates, { name: "", email: "", file: null }]);
+  };
+
+  // submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const uploadPromises = candidates.map(async (c) => {
+        try {
+          const formData = new FormData();
+          formData.append("resume", c.file);
+          formData.append("name", c.name);
+          formData.append("email", c.email);
+          formData.append("job_desc", jobDesc);
+
+          const response = await fetch("http://localhost:8000/api/upload/", {
+            method: "POST",
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Backend error:", errorText);
+            throw new Error(`Failed to process ${c.name}`);
+          }
+          
+          const data = await response.json();
+          return (data.results && data.results.length > 0) ? data.results[0] : (Array.isArray(data) ? data[0] : data);
+        } catch (err) {
+          console.error(`Error uploading ${c.name}:`, err);
+          return null;
+        }
+      });
+
+      const allResults = await Promise.all(uploadPromises);
+      const resultsArray = allResults.filter(r => r !== null);
+      
+      setResults(resultsArray);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div style={{ padding: "30px" }}>
+      <h1>AI Resume Screening System 🚀</h1>
+
+      <form onSubmit={handleSubmit}>
+        {candidates.map((c, index) => (
+          <div key={index} style={{ marginBottom: "15px" }}>
+            <input
+              type="text"
+              placeholder="Name"
+              onChange={(e) =>
+                handleChange(index, "name", e.target.value)
+              }
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              onChange={(e) =>
+                handleChange(index, "email", e.target.value)
+              }
+            />
+
+            <input
+              type="file"
+              onChange={(e) =>
+                handleChange(index, "file", e.target.files[0])
+              }
+            />
+          </div>
+        ))}
+
+        <button type="button" onClick={addCandidate}>
+          + Add Candidate
+        </button>
+
+        <br /><br />
+
+        <textarea
+          value={jobDesc}
+          placeholder="Enter Job Description"
+          onChange={(e) => setJobDesc(e.target.value)}
+        />
+
+        <br /><br />
+
+        <button type="submit">Upload & Analyze</button>
+      </form>
+
+      <hr />
+
+      <h2>Results</h2>
+
+      {results.map((r, index) => (
+        <div key={index} style={{ border: "1px solid gray", padding: "10px", margin: "10px" }}>
+          <h3>{r.name} ({r.status})</h3>
+          <p>Email: {r.email}</p>
+          <p>Score: {r.score}</p>
+          <p>Rank: {r.rank}</p>
+          <p>Category: {r.category}</p>
+
+          <p><b>Matched Skills:</b> {r.matched_skills}</p>
+          <p><b>Missing Skills:</b> {r.missing_skills}</p>
+          <p><b>Problem:</b> {r.problem}</p>
+
+          <a href={r.improve_link} target="_blank">Improve with AI 🤖</a>
+          <br />
+          <a href={r.google_link} target="_blank">Search on Google 🌐</a>
+
+          {index === 0 && <h4>🏆 Top Candidate</h4>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App;

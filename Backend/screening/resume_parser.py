@@ -31,47 +31,7 @@ COMMON_SKILLS = [
     "communication", "teamwork", "problem solving", "leadership", "time management"
 ]
 
-SKILL_WEIGHTS = {
 
-    #Programming Languages (Core)
-    "python": 2.0, "java": 2.0, "c": 1.5, "c++": 1.5,
-    "javascript": 2.0, "typescript": 1.5, "go": 1.5, "ruby": 1.5,
-
-    # Web Development
-    "react": 2.0, "angular": 1.5, "vue": 1.5,
-    "node": 2.0, "express": 1.5, "django": 2.0, "flask": 1.5,
-    "html": 1.0, "css": 1.0,
-
-    # Databases
-    "sql": 2.0, "mysql": 1.5, "postgresql": 1.5,
-    "mongodb": 1.5, "oracle": 1.5, "sqlite": 1.0,
-
-    # AI / Data Science (HIGH IMPORTANCE)
-    "machine learning": 2.5, "deep learning": 2.5, "nlp": 2.5,
-    "data science": 2.0, "data analysis": 1.5,
-    "pandas": 1.5, "numpy": 1.5, "scikit-learn": 2.0,
-    "tensorflow": 2.5, "keras": 2.0, "matplotlib": 1.0,
-
-    # Cloud & DevOps
-    "aws": 2.0, "azure": 1.5, "gcp": 1.5,
-    "docker": 2.0, "kubernetes": 2.0,
-    "ci/cd": 1.5, "jenkins": 1.5, "git": 1.5, "github": 1.0,
-
-    # Tools & Systems
-    "linux": 1.5, "unix": 1.5,
-    "rest api": 2.0, "graphql": 1.5, "postman": 1.0,
-
-    # Mobile
-    "android": 1.5, "ios": 1.5,
-    "react native": 1.5, "flutter": 1.5,
-
-    # Soft Skills (LOW WEIGHT)
-    "communication": 0.5,
-    "teamwork": 0.5,
-    "problem solving": 1.0,
-    "leadership": 0.5,
-    "time management": 0.5
-}
 
 def tfidf_score(resume_text, job_desc):
     if not resume_text or not job_desc:
@@ -168,37 +128,51 @@ def analyze_resume(text, job_desc, job_skills=None):
                 required_skills.append(skill)
 
     matched_skills = []
+    skill_occurrences = 0
 
     for skill in required_skills:
         # More flexible pattern matching - handles multi-word skills better
         pattern = r'(?:^|\W)' + re.escape(skill) + r'(?:\W|$)'
-        if re.search(pattern, text):
+        matches = re.findall(pattern, text)
+        if matches:
             matched_skills.append(skill)
+            skill_occurrences += len(matches)
 
     missing_skills = list(set(required_skills) - set(matched_skills))
 
-    # Calculate weighted score based on skill importance
-    matched_weight = sum(SKILL_WEIGHTS.get(skill, 1.0) for skill in matched_skills)
-    required_weight = sum(SKILL_WEIGHTS.get(skill, 1.0) for skill in required_skills)
-    
-    if required_weight > 0:
-        weighted_score = (matched_weight / required_weight) * 100
+    # Calculate score based on skill matching
+    if len(required_skills) > 0:
+        raw_score = (len(matched_skills) / len(required_skills)) * 100
     else:
-        weighted_score = 0
+        raw_score = 0
     
     # Normalize to 0-100 range
-    score = min(100, max(0, weighted_score))
-    score = round(score, 2)
+    score = min(100, max(0, raw_score))
+    
+    # --- FRAUD DETECTION: Keyword Stuffing ---
+    total_words = len(text.split())
+    is_flagged = False
+    
+    if total_words > 0:
+        # If the required skills make up more than 12% of the entire resume words, it's likely stuffed
+        skill_density = skill_occurrences / total_words
+        if skill_density > 0.12:
+            is_flagged = True
+            score = score * 0.1  # Penalize heavily (reduce to 10% of original score)
+            score = round(score, 2)
+            feedback = "⚠️ FLAG: Keyword stuffing detected (unnatural skill density). Score penalized."
 
-    # Accurate feedback based on score
-    if score >= 80:
-        feedback = "Excellent match for the role"
-    elif score >= 60:
-        feedback = "Good match for the role"
-    elif score >= 40:
-        feedback = f"Moderate match - Missing skills: {', '.join(missing_skills[:3])}" if missing_skills else "Moderate match"
-    else:
-        feedback = "Candidate lacks required skills"
+    if not is_flagged:
+        score = round(score, 2)
+        # Accurate feedback based on score
+        if score >= 80:
+            feedback = "Excellent match for the role"
+        elif score >= 60:
+            feedback = "Good match for the role"
+        elif score >= 40:
+            feedback = f"Moderate match - Missing skills: {', '.join(missing_skills[:3])}" if missing_skills else "Moderate match"
+        else:
+            feedback = "Candidate lacks required skills"
 
     # Extract all skills present in the resume
     all_resume_skills = extract_skills(text)

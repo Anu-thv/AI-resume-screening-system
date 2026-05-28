@@ -7,6 +7,7 @@ import {
   FiArrowRight,
   FiFileText,
   FiBarChart2,
+  FiGithub,
 } from 'react-icons/fi';
 
 function HomePage() {
@@ -62,6 +63,17 @@ function HomePage() {
             >
               Backup Data
             </motion.button>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              href="https://github.com/Anu-thv/AI-resume-screening-system"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-2xl bg-[#24292e] border border-white/20 hover:bg-[#2f363d] shadow-xl font-semibold flex items-center justify-center gap-2 text-white"
+            >
+              <FiGithub className="text-xl" />
+              GitHub
+            </motion.a>
           </div>
         </motion.div>
 

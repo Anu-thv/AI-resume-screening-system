@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-
+import { FiGithub } from "react-icons/fi";
 function Navbar() {
   const navigate = useNavigate();
   const role = localStorage.getItem("userRole");
@@ -27,9 +27,9 @@ function Navbar() {
           onClick={() => navigate("/")}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <img 
-            src="/hiresense_logo.png" 
-            alt="HireSense Logo" 
+          <img
+            src="/hiresense_logo.png"
+            alt="HireSense Logo"
             className="w-8 h-8 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)] group-hover:shadow-[0_0_20px_rgba(34,211,238,0.8)] transition-shadow duration-300"
           />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
@@ -46,6 +46,16 @@ function Navbar() {
           <Link to="/about" className="hover:text-cyan-400 transition">
             About
           </Link>
+
+          <a 
+            href="https://github.com/Anu-thv/AI-resume-screening-system" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 hover:text-cyan-400 transition"
+          >
+            <FiGithub />
+            GitHub
+          </a>
 
           {role ? (
             <>

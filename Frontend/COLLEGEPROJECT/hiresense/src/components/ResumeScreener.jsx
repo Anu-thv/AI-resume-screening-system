@@ -247,25 +247,8 @@ const ResumeScreener = () => {
                   </div>
 
                   {/* Skills Display Grid */}
-                  <div className="p-6 md:p-8 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="p-6 md:p-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     
-                    {/* Required Skills (Blue) */}
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> Required Skills
-                      </h4>
-                      {result.required_skills.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {result.required_skills.map((skill, idx) => (
-                            <span key={idx} className="px-2.5 py-1 bg-blue-500/10 text-blue-300 border border-blue-500/20 rounded text-xs">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-500 italic">None specified</p>
-                      )}
-                    </div>
 
                     {/* Matched Skills (Green) */}
                     <div className="space-y-3">

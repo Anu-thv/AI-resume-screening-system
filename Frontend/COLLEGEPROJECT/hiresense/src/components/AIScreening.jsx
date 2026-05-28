@@ -91,21 +91,6 @@ function AIScreening({ isHR = false, candidateData }) {
                     )}
                 </div>
 
-                {/* Required Skills */}
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <h3 className="text-sm font-semibold text-cyan-400 mb-3 uppercase tracking-wider">
-                        Required Skills
-                    </h3>
-                    {requiredSkills.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                            {requiredSkills.map((skill, i) => (
-                                <span key={i} className="px-2 py-1 bg-cyan-500/10 text-cyan-300 text-xs rounded border border-cyan-500/20">{skill}</span>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-slate-400 italic text-sm">No specific requirements.</p>
-                    )}
-                </div>
 
                 {/* Missing Skills */}
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">

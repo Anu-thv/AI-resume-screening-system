@@ -14,20 +14,55 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("userRole", role);
-    localStorage.setItem("userEmail", email);
+    setErrorMsg("");
+    setIsLoading(true);
 
-    if (!isLogin) {
-      alert("Account Created Successfully!");
-    }
+    const apiRole = role === "hr" ? "recruiter" : "candidate";
+    const username = (role === "hr" ? "r_" : "c_") + email;
 
-    if (role === "hr") {
-      navigate("/hr-dashboard");
-    } else {
-      navigate("/candidate-dashboard");
+    try {
+      if (isLogin) {
+        const response = await fetch("/api/login/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, role: apiRole })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("userEmail", email);
+          navigate(role === "hr" ? "/hr-dashboard" : "/candidate-dashboard");
+        } else {
+          setErrorMsg(data.error || "Invalid email or password");
+        }
+      } else {
+        const response = await fetch("/api/signup/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert("Account Created Successfully! Please log in.");
+          setIsLogin(true);
+          setPassword("");
+        } else {
+          setErrorMsg(data.error || "Failed to create account");
+        }
+      }
+    } catch (err) {
+      setErrorMsg("Failed to connect to the server. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +110,13 @@ function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {errorMsg && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm text-center">
+                {errorMsg}
+              </div>
+            )}
+
             
             <AnimatePresence mode="popLayout">
               {!isLogin && (
@@ -167,13 +209,21 @@ function Login() {
 
             <button
               type="submit"
-              className={`w-full h-12 rounded-xl text-white font-bold flex items-center justify-center gap-2 mt-6 hover:scale-105 transition-all
+              disabled={isLoading}
+              className={`w-full h-12 rounded-xl text-white font-bold flex items-center justify-center gap-2 mt-6 transition-all
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
               ${isLogin 
                 ? 'bg-gradient-to-r from-cyan-500 to-purple-600 shadow-[0_0_20px_rgba(6,182,212,0.3)]' 
                 : 'bg-gradient-to-r from-purple-500 to-pink-600 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
               }`}
             >
-              {isLogin ? <><FiLogIn /> Login</> : <><FiUserPlus /> Create Account</>}
+              {isLoading ? (
+                <span>Please wait...</span>
+              ) : isLogin ? (
+                <><FiLogIn /> Login</>
+              ) : (
+                <><FiUserPlus /> Create Account</>
+              )}
             </button>
           </form>
 

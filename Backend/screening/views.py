@@ -213,4 +213,4 @@ def upload_resume(request):
         "message": "Resumes uploaded and analyzed successfully",
         "results": final_results
     })
-    
+       

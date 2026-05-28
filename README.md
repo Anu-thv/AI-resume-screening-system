@@ -15,8 +15,11 @@ HireSense is a full-stack web application that leverages Machine Learning to aut
 
 ## 📸 Application Screenshots
 
+<img src="screenshots/screenshot_1.png" width="800" />
+<img src="screenshots/screenshot_2.png" width="800" />
+
 <details>
-<summary>Click here to view application screenshots</summary>
+<summary>Click here to view more application screenshots</summary>
 
 <img src="screenshots/WhatsApp%20Image%202026-05-22%20at%2009.15.52.jpeg" width="800" />
 <img src="screenshots/WhatsApp%20Image%202026-05-22%20at%2009.15.53%20(1).jpeg" width="800" />

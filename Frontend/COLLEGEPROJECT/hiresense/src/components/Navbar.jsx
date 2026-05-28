@@ -47,6 +47,12 @@ function Navbar() {
             About
           </Link>
 
+          {role === "hr" && (
+            <Link to="/screener" className="hover:text-cyan-400 transition text-cyan-200 font-semibold">
+              AI Screener Tool
+            </Link>
+          )}
+
           <a 
             href="https://github.com/Anu-thv/AI-resume-screening-system" 
             target="_blank" 

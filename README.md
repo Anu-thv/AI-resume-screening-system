@@ -9,7 +9,9 @@ HireSense is a full-stack web application that leverages Machine Learning to aut
 - **AI-Powered Scoring**: Calculates a match score (0-100%) based on the job description and candidate's skills.
 - **Candidate Ranking**: Sorts candidates based on their match score, categorizing them into Excellent, Average, or Not Eligible.
 - **Automated Email Notifications**: Automatically sends personalized emails to candidates with their screening results and feedback.
-- **Role-Based Access Control**: Separate login portals for recruiters and candidates.
+- **Role-Based Access Control**: Secure login portals with real backend database authentication for recruiters and candidates.
+- **Standalone AI Screener Tool**: A dedicated tool with premium UI skeleton loading states for rapid resume evaluation.
+- **Export Reports**: One-click export of AI screening results to CSV and PDF formats for easy sharing and record-keeping.
 
 ## 📸 Application Screenshots
 

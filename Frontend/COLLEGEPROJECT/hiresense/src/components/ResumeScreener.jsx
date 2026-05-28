@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiUpload, FiRefreshCw, FiAlertCircle, FiExternalLink, FiSearch } from 'react-icons/fi';
+import { FiUpload, FiRefreshCw, FiAlertCircle, FiExternalLink, FiSearch, FiDownload, FiPrinter } from 'react-icons/fi';
 
 const CircularProgress = ({ percentage, colorClass }) => {
   const radius = 36;
@@ -16,6 +16,29 @@ const CircularProgress = ({ percentage, colorClass }) => {
     </div>
   );
 };
+
+const SkeletonLoader = () => (
+  <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-pulse mt-8">
+    <div className="bg-black/20 border-b border-white/5 p-6 md:p-8 flex justify-between items-center gap-6">
+      <div className="space-y-3 w-1/3">
+        <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+        <div className="h-6 bg-slate-700 rounded w-3/4"></div>
+      </div>
+      <div className="w-24 h-24 rounded-full bg-slate-800"></div>
+    </div>
+    <div className="p-6 md:p-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="space-y-4">
+          <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+          <div className="flex gap-2">
+            <div className="h-6 bg-slate-800 rounded w-16"></div>
+            <div className="h-6 bg-slate-800 rounded w-20"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 const ResumeScreener = () => {
   const [file, setFile] = useState(null);
@@ -122,6 +145,34 @@ const ResumeScreener = () => {
     return 'text-red-500';
   };
 
+  const handleExportCSV = () => {
+    if (results.length === 0) return;
+    
+    const headers = ['Candidate Name', 'Match Score', 'Matched Skills', 'Missing Skills', 'Status'];
+    const csvContent = [
+      headers.join(','),
+      ...results.map(r => [
+        `"${r.candidate_name}"`,
+        r.score,
+        `"${r.matched_skills.join(', ')}"`,
+        `"${r.missing_skills.join(', ')}"`,
+        r.score >= 70 ? 'Highly Eligible' : r.score >= 40 ? 'Moderate Match' : 'Low Match'
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'ai_screening_results.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white p-6 md:p-10 font-sans">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -220,10 +271,36 @@ const ResumeScreener = () => {
           </button>
         </form>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="space-y-4 pt-4">
+            <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-3">
+              <FiRefreshCw className="animate-spin" /> AI is analyzing the resume...
+            </h2>
+            <SkeletonLoader />
+          </div>
+        )}
+
         {/* Results Section */}
-        {results.length > 0 && (
+        {!isLoading && results.length > 0 && (
           <div className="space-y-8 pt-4">
-            <h2 className="text-2xl font-bold text-white">Screening Results</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-2xl font-bold text-white">Screening Results</h2>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <FiDownload /> Export CSV
+                </button>
+                <button 
+                  onClick={handlePrintPDF}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <FiPrinter /> Save as PDF
+                </button>
+              </div>
+            </div>
             
             <div className="grid gap-8">
               {results.map((result) => (
